@@ -11,12 +11,14 @@ variables:
   MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
 
 steps:
+  - checkout: self
+
   # --------------------------
   # Cache Maven dependencies
   # --------------------------
   - task: Cache@2
     inputs:
-      key: 'maven | "$(Agent.OS)" | pom.xml'
+      key: 'maven | "$(Agent.OS)" | experiment-02-maven/pom.xml'
       restoreKeys: |
         maven | "$(Agent.OS)"
       path: $(MAVEN_CACHE_FOLDER)
@@ -35,23 +37,16 @@ steps:
       jdkVersionOption: '1.17'
     displayName: 'Maven Build & Test'
 
-  # --------------------------
-  # Publish Artifacts
-  # --------------------------
-  - task: PublishBuildArtifacts@1
-    inputs:
-      PathtoPublish: 'experiment-02-maven/target'
-      ArtifactName: 'drop'
-    displayName: 'Publish Artifacts'
+  # ✅ Debug step (very important)
+  - script: ls -R experiment-02-maven/target
+    displayName: 'Verify build output'
 
   # --------------------------
   # Deploy to Azure App Service
   # --------------------------
   - task: AzureWebApp@1
     inputs:
-      azureSubscription: 'Azure subscription 1(e9a472da-79d4-4781-90da-445594c7bc6c)'  # Your service connection
-      appName: 'azure-poc'                                                               # Your App Service name
-      package: 'experiment-02-maven/target/*.jar'                                        # Built JAR
-      runtimeStack: 'JAVA|17-java17'                                                    # Java 17 runtime
-      startupCommand: 'java -jar *.jar'                                                # Spring Boot startup
+      azureSubscription: 'Azure subscription 1(e9a472da-79d4-4781-90da-445594c7bc6c)'
+      appName: 'azure-poc'
+      package: 'experiment-02-maven/target/*.jar'
     displayName: 'Deploy to Azure App Service'
