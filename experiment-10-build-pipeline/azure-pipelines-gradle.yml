@@ -1,11 +1,15 @@
 # azure-pipelines.yml — Gradle Build Pipeline
 trigger:
-  - master   # updated from 'main' to 'master'
+  - master  # updated to master branch
 
 pool:
   vmImage: 'ubuntu-latest'
 
 steps:
+  # Checkout the repository with shallow clone
+  - checkout: self
+    fetchDepth: 1
+
   # Cache Gradle dependencies for faster builds
   - task: Cache@2
     inputs:
