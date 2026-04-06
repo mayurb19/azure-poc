@@ -1,16 +1,24 @@
 # azure-pipelines.yml — Gradle Build Pipeline
 trigger:
-  - main
+  - master   # updated from 'main' to 'master'
 
 pool:
   vmImage: 'ubuntu-latest'
 
 steps:
+  # Cache Gradle dependencies for faster builds
+  - task: Cache@2
+    inputs:
+      key: 'gradle | "**/*.gradle*" | "**/gradle-wrapper.properties"'
+      path: ~/.gradle/caches
+    displayName: 'Cache Gradle Dependencies'
+
+  # Gradle build
   - task: Gradle@3
     inputs:
-      workingDirectory: ''
-      gradleWrapperFile: 'experiment-03-gradle/gradlew'
-      gradleOptions: '-Xmx3072m'
+      workingDirectory: 'experiment-03-gradle'
+      gradleWrapperFile: 'gradlew'
+      gradleOptions: '-Xmx3072m --no-daemon'
       javaHomeOption: 'JDKVersion'
       jdkVersionOption: '1.17'
       jdkArchitectureOption: 'x64'
@@ -19,7 +27,9 @@ steps:
       tasks: 'clean build'
     displayName: 'Gradle Build'
 
+  # Publish build artifacts
   - task: PublishBuildArtifacts@1
     inputs:
       PathtoPublish: 'experiment-03-gradle/build/libs'
       ArtifactName: 'gradle-artifact'
+    displayName: 'Publish Build Artifacts'
