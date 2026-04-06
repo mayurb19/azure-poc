@@ -4,13 +4,16 @@ trigger:
       - main
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: ubuntu-latest
 
 variables:
   MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
   MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
 
 steps:
+  # --------------------------
+  # Checkout code
+  # --------------------------
   - checkout: self
 
   # --------------------------
@@ -37,16 +40,20 @@ steps:
       jdkVersionOption: '1.17'
     displayName: 'Maven Build & Test'
 
-  # ✅ Debug step (very important)
-  - script: ls -R experiment-02-maven/target
-    displayName: 'Verify build output'
+  # --------------------------
+  # Verify build output (DEBUG)
+  # --------------------------
+  - script: |
+      echo "Listing target folder:"
+      ls -R experiment-02-maven/target
+    displayName: 'Verify JAR file exists'
 
   # --------------------------
   # Deploy to Azure App Service
   # --------------------------
   - task: AzureWebApp@1
     inputs:
-      azureSubscription: 'Azure subscription 1(e9a472da-79d4-4781-90da-445594c7bc6c)'
-      appName: 'azure-poc'
-      package: 'experiment-02-maven/target/*.jar'
+      azureSubscription: 'Azure subscription 1(e9a472da-79d4-4781-90da-445594c7bc6c)'  # Service connection
+      appName: 'azure-poc'                                                             # App Service name
+      package: 'experiment-02-maven/target/*.jar'                                      # JAR path
     displayName: 'Deploy to Azure App Service'
